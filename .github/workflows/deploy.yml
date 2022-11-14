@@ -23,7 +23,7 @@ jobs:
           command: c
           files: |
             ./src
-          outPath: homebrew-awspm-${{ env.RELEASE_VERSION }}-darwin-amd64.tar.gz
+          outPath: homebrew-awspm-${{ env.RELEASE_VERSION }}-darwin-arm64.tar.gz
       - name: release
         uses: actions/create-release@v1
         id: create_release
