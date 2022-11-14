@@ -15,7 +15,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: version
-        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+        run: |
+            echo "TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+            echo "VERSION=${TAG#v}" >> $GITHUB_ENV
       - name: Compress action step
         uses: a7ul/tar-action@v1.1.0
         id: compress
@@ -23,14 +25,14 @@ jobs:
           command: c
           files: |
             ./src
-          outPath: homebrew-awspm-${{ env.RELEASE_VERSION }}-darwin-arm64.tar.gz
+          outPath: homebrew-awspm-${{ env.TAG }}-darwin-arm64.tar.gz
       - name: release
         uses: actions/create-release@v1
         id: create_release
         with:
           draft: false
           prerelease: false
-          release_name: ${{ env.RELEASE_VERSION }}
+          release_name: ${{ env.TAG }}
           tag_name: ${{ github.ref }}
           body_path: CHANGELOG.md
         env:
@@ -41,8 +43,8 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: homebrew-awspm-${{ env.RELEASE_VERSION }}-darwin-arm64.tar.gz
-          asset_name: homebrew-awspm-${{ github.ref }}-darwin-arm64.tar.gz
+          asset_path: homebrew-awspm-${{ env.TAG }}-darwin-arm64.tar.gz
+          asset_name: homebrew-awspm-${{ env.VERSION }}-darwin-arm64.tar.gz
           asset_content_type: application/gzip
       - name: Release awspm to Homebrew
         uses: Justintime50/homebrew-releaser@v1
