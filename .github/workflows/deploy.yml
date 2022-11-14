@@ -21,7 +21,6 @@ jobs:
         id: compress
         with:
           command: c
-          cwd: ./bin
           files: |
             ./src
           outPath: homebrew-awspm-${{ env.RELEASE_VERSION }}-darwin-amd64.tar.gz
