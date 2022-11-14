@@ -16,8 +16,9 @@ jobs:
           fetch-depth: 0
       - name: version
         run: |
-            echo "TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-            echo "VERSION=${TAG#v}" >> $GITHUB_ENV
+          echo "TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+          TAG=${GITHUB_REF#refs/*/}
+          echo "VERSION=${TAG#v}" >> $GITHUB_ENV
       - name: Compress action step
         uses: a7ul/tar-action@v1.1.0
         id: compress
