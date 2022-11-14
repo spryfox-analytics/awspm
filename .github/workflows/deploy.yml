@@ -6,6 +6,47 @@ on:
       - "*"
 
 jobs:
+  build_release:
+    name: build_release
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: build
+        run: make build
+      - name: version
+        run: echo "::set-output name=version::$(./src/awspm.sh version)"
+        id: version
+      - name: Compress action step
+        uses: a7ul/tar-action@v1.1.0
+        id: compress
+        with:
+          command: c
+          files: |
+            ./src
+          outPath: ./bin/homebrew-awspm-${{ steps.version.outputs.version }}-darwin-amd64.tar.gz
+      - name: release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ steps.version.outputs.version }}
+          tag_name: ${{ github.ref }}
+          body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: upload darwin artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./bin/homebrew-awspm-${{ steps.version.outputs.version }}-darwin-amd64.tar.gz
+          asset_name: homebrew-awspm-${{ steps.version.outputs.version }}-darwin-amd64.tar.gz
+          asset_content_type: application/gzip
   homebrew-releaser:
     runs-on: ubuntu-latest
     name: homebrew-releaser
@@ -51,9 +92,9 @@ jobs:
           # Linux ARM pre-existing path example: https://github.com/justintime50/myrepo/releases/download/v1.2.0/myrepo-1.2.0-linux-arm64.tar.gz
           # Optional - booleans.
           target_darwin_amd64: true
-          target_darwin_arm64: false
+          target_darwin_arm64: true
           target_linux_amd64: true
-          target_linux_arm64: false
+          target_linux_arm64: true
 
           # Update your homebrew tap's README with a table of all projects in the tap.
           # This is done by pulling the information from all your formula.rb files - eg:

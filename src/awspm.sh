@@ -3,6 +3,7 @@
 AWS_CONFIG_FILE_PATH="${HOME}/.aws/config"
 ZSH_PROFILE_FILE_PATH="${HOME}/.zprofile"
 SEP="TOKENSEPARATOR"
+VERSION=0.0.1
 
 function source_aws_accounts_file() {
     aws_accounts_directory_path=$(pwd)
@@ -202,6 +203,8 @@ elif [ "$1" = "set" ]; then
         echo "Unknown argument $2"
         exit 1
     fi
+elif [ "$1" = "version" ]; then
+    echo "${VERSION}"
 else
     echo ""
     echo "==================================================================="
