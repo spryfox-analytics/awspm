@@ -181,10 +181,11 @@ function load_profile() {
     echo "Loaded profile ${aws_profile_name}."
 }
 
-source_aws_accounts_file
 if [ "$1" = "init" ]; then
+    source_aws_accounts_file
     init "${AWS_PROFILE_PREFIX}" "${AWS_SSO_START_URL}" "${AWS_REGION}"
 elif [ "$1" = "set" ]; then
+    source_aws_accounts_file
     if [ $# -gt 3 ]; then
         echo "Too many arguments."
         exit 1
