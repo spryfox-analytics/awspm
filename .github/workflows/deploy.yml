@@ -21,9 +21,10 @@ jobs:
         id: compress
         with:
           command: c
+          cwd: ./bin
           files: |
             ./src
-          outPath: ./bin/homebrew-awspm-${{ env.RELEASE_VERSION }}-darwin-amd64.tar.gz
+          outPath: homebrew-awspm-${{ env.RELEASE_VERSION }}-darwin-amd64.tar.gz
       - name: release
         uses: actions/create-release@v1
         id: create_release
