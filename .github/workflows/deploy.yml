@@ -42,7 +42,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: homebrew-awspm-${{ env.RELEASE_VERSION }}-darwin-arm64.tar.gz
-          asset_name: homebrew-awspm-${{ github.event.release.tag_name }}-darwin-arm64.tar.gz
+          asset_name: homebrew-awspm-${{ github.ref }}-darwin-arm64.tar.gz
           asset_content_type: application/gzip
       - name: Release awspm to Homebrew
         uses: Justintime50/homebrew-releaser@v1
