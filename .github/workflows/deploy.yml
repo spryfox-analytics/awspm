@@ -10,7 +10,7 @@ jobs:
     name: build_release
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
+      - name: Checkout code
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -41,8 +41,8 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./bin/homebrew-awspm-${{ steps.version.outputs.version }}-darwin-amd64.tar.gz
-          asset_name: homebrew-awspm-${{ steps.version.outputs.version }}-darwin-amd64.tar.gz
+          asset_path: ./bin/homebrew-awspm-${{ env.RELEASE_VERSION }}-darwin-arm64.tar.gz
+          asset_name: homebrew-awspm-${{ env.RELEASE_VERSION }}-darwin-arm64.tar.gz
           asset_content_type: application/gzip
       - name: Release awspm to Homebrew
         uses: Justintime50/homebrew-releaser@v1
