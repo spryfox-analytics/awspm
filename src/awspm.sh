@@ -125,7 +125,7 @@ function add_cd_auto_execution() {
 function cd {
     builtin cd "\$@"
     if [[ \$(awspm test) == true ]]; then
-        export AWS_PROFILE=\$(awspm profile)
+        export AWS_PROFILE="\$(awspm profile)"
     fi
 }
 cd \$PWD
