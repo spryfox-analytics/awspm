@@ -200,6 +200,7 @@ if [ "$1" = "init" ]; then
     init "${AWS_PROFILE_PREFIX}" "${AWS_SSO_START_URL}" "${AWS_REGION}"
     exit 0
 elif [ "$1" = "profile" ]; then
+    source_aws_accounts_file
     echo $(derive_profile_name_from_directory "${AWS_PROFILE_PREFIX}")
     exit 0
 elif [ "$1" = "test" ]; then
