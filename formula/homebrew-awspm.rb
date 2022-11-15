@@ -20,6 +20,6 @@ class HomebrewAwspm < Formula
   end
 
   def install
-    bin.install "src/awspm.sh" => "awspm"
+    bin.install "awspm.sh" => "awspm"
   end
 end

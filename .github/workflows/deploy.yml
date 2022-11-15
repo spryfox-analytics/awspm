@@ -75,7 +75,7 @@ jobs:
 
           # Custom install command for your formula.
           # Required - string.
-          install: 'bin.install "src/awspm.sh" => "awspm"'
+          install: 'bin.install "awspm.sh" => "awspm"'
 
           # Custom test command for your formula so you can run `brew test`.
           # Optional - string.
