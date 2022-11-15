@@ -189,34 +189,30 @@ if [ "$1" = "init" ]; then
     init "${AWS_PROFILE_PREFIX}" "${AWS_SSO_START_URL}" "${AWS_REGION}"
 elif [ "$1" = "set" ]; then
     source_aws_accounts_file
-    if [ $# -gt 3 ]; then
+    if [ $# -gt 2 ]; then
         echo "Too many arguments."
         exit 1
-    elif [ $# -lt 3 ]; then
+    elif [ $# -lt 2 ]; then
         profile_name=$(derive_profile_name_from_directory "${AWS_PROFILE_PREFIX}")
-        if [[ "${stage}" != "" ]]; then
+        echo "${profile_name}"
+        if [[ "${profile_name}" != "" ]]; then
             load_profile "${profile_name}"
             exit 0
         fi
     else
-        if [[ "$2" = "-p" || "$2" = "--profile" ]]; then
-            load_profile $3
-            exit 0
-        else
-            echo "Unknown argument $2"
-            exit 1
-        fi
+        load_profile $2
+        exit 0
     fi
 elif [ "$1" = "version" ]; then
     echo "${VERSION}"
 else
     echo ""
-    echo "==================================================================="
-    echo "AWS Profile Manager"
-    echo "==================================================================="
+    echo "#==============================================================#"
+    echo "# AWS Profile Manager =========================================#"
+    echo "#==============================================================#"
     echo "Usage:"
-    echo "- awspm init                -> Configures the AWS account profiles."
-    echo "- awspm set                 -> Loads profile for current folder."
-    echo "- awspm set -p PROFILE_NAME -> Loads profile with given name."
+    echo "- awspm init             -> Configures the AWS account profiles."
+    echo "- awspm set              -> Loads profile for current folder."
+    echo "- awspm set PROFILE_NAME -> Loads profile with given name."
     echo ""
 fi
