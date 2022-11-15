@@ -124,7 +124,7 @@ function add_cd_auto_execution() {
 
 function cd {
     builtin cd "\$@"
-    if [[ $(awspm test) == true ]]; then
+    if [[ \$(awspm test) == true ]]; then
         unset AWS_PROFILE
         unset AWS_ACCESS_KEY_ID
         unset AWS_SECRET_ACCESS_KEY
