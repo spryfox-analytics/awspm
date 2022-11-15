@@ -18,8 +18,4 @@ class HomebrewAwspm < Formula
       sha256 "36fa6e588bcd2d2af9ef2617f9e4769da6667b02e98e8ad6a951debe2c819333"
     end
   end
-
-  def install
-    bin.install "src/awspm.sh" => "awspm"
-  end
 end
