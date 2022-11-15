@@ -194,7 +194,6 @@ elif [ "$1" = "set" ]; then
         exit 1
     elif [ $# -lt 2 ]; then
         profile_name=$(derive_profile_name_from_directory "${AWS_PROFILE_PREFIX}")
-        echo "${profile_name}"
         if [[ "${profile_name}" != "" ]]; then
             load_profile "${profile_name}"
             exit 0
