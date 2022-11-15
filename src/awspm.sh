@@ -125,11 +125,7 @@ function add_cd_auto_execution() {
 function cd {
     builtin cd "\$@"
     if [[ \$(awspm test) == true ]]; then
-        unset AWS_PROFILE
-        unset AWS_ACCESS_KEY_ID
-        unset AWS_SECRET_ACCESS_KEY
-        unset AWS_SESSION_TOKEN
-        awspm set
+        export AWS_PROFILE=\$(awspm profile)
     fi
 }
 cd \$PWD
@@ -199,35 +195,13 @@ function derive_profile_name_from_directory() {
     fi
 }
 
-function load_profile() {
-    aws_profile_name=$1
-    fail_for_empty_variable "aws_profile_name" $aws_profile_name
-    unset AWS_PROFILE
-    unset AWS_ACCESS_KEY_ID
-    unset AWS_SECRET_ACCESS_KEY
-    unset AWS_SESSION_TOKEN
-    export AWS_PROFILE="${aws_profile_name}"
-    echo "Loaded profile ${aws_profile_name}."
-}
-
 if [ "$1" = "init" ]; then
     source_aws_accounts_file
     init "${AWS_PROFILE_PREFIX}" "${AWS_SSO_START_URL}" "${AWS_REGION}"
-elif [ "$1" = "set" ]; then
-    source_aws_accounts_file
-    if [ $# -gt 2 ]; then
-        echo "Too many arguments."
-        exit 1
-    elif [ $# -lt 2 ]; then
-        profile_name=$(derive_profile_name_from_directory "${AWS_PROFILE_PREFIX}")
-        if [[ "${profile_name}" != "" ]]; then
-            load_profile "${profile_name}"
-            exit 0
-        fi
-    else
-        load_profile $2
-        exit 0
-    fi
+    exit 0
+elif [ "$1" = "profile" ]; then
+    echo $(derive_profile_name_from_directory "${AWS_PROFILE_PREFIX}")
+    exit 0
 elif [ "$1" = "test" ]; then
     source_aws_accounts_file
     if [[ $(test_if_value_set "${AWS_PROFILE_PREFIX}") == true || $(test_if_value_set "${AWS_SSO_START_URL}") == true || $(test_if_value_set "${AWS_REGION}") == true ]]; then
@@ -235,8 +209,10 @@ elif [ "$1" = "test" ]; then
     else
         echo false
     fi
+    exit 0
 elif [ "$1" = "version" ]; then
     echo "${VERSION}"
+    exit 0
 else
     echo ""
     echo "#=================================================================================#"
@@ -244,8 +220,8 @@ else
     echo "#=================================================================================#"
     echo "Usage:"
     echo "- awspm init             -> Configures the AWS account profiles."
-    echo "- awspm set              -> Loads profile for current folder."
-    echo "- awspm set PROFILE_NAME -> Loads profile with given name."
+    echo "- awspm profile          -> Derives a profile name for the current folder."
     echo "- awspm test             -> Checks whether a valid .aws_accounts file can be found."
     echo ""
+    exit 0
 fi
