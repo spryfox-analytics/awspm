@@ -190,12 +190,12 @@ function derive_profile_name_from_directory() {
     fi
     directory_names="development integration production tool"
     if exists_in_list "${directory_names}" " " "${directory_name}"; then
-        vared -p "Which role do you want to request for ${aws_profile_name}? [read] " -c role_name
+        aws_profile_base_name="${aws_profile_prefix}-${directory_name}"
+        vared -p "Which role do you want to request for ${aws_profile_base_name}? [read] " -c role_name
         if [[ "${role_name}" == "" ]]; then
             role_name="read"
         fi
-        aws_profile_name="${aws_profile_prefix}-${directory_name}-${role_name}"
-        echo "${aws_profile_name}"
+        echo "${aws_profile_base_name}-${role_name}"
     fi
 }
 
