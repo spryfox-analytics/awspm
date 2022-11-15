@@ -166,6 +166,9 @@ function derive_profile_name_from_directory() {
     directory_names="development integration production tool"
     if exists_in_list "${directory_names}" " " "${directory_name}"; then
         vared -p "Which role do you want to request for ${aws_profile_name}? [read] " -c role_name
+        if [[ "${role_name}" == "" ]]; then
+            role_name="read"
+        fi
         aws_profile_name="${aws_profile_prefix}-${directory_name}-${role_name}"
         echo "${aws_profile_name}"
     fi
@@ -189,20 +192,20 @@ elif [ "$1" = "set" ]; then
     if [ $# -gt 3 ]; then
         echo "Too many arguments."
         exit 1
-    fi
-    if [ $# -lt 3 ]; then
-        stage=$(derive_profile_name_from_directory "${AWS_PROFILE_PREFIX}")
+    elif [ $# -lt 3 ]; then
+        profile_name=$(derive_profile_name_from_directory "${AWS_PROFILE_PREFIX}")
         if [[ "${stage}" != "" ]]; then
-            load_profile "${stage}"
+            load_profile "${profile_name}"
             exit 0
         fi
-    fi
-    if [[ "$2" = "-p" || "$2" = "--profile" ]]; then
-        load_profile $3
-        exit 0
     else
-        echo "Unknown argument $2"
-        exit 1
+        if [[ "$2" = "-p" || "$2" = "--profile" ]]; then
+            load_profile $3
+            exit 0
+        else
+            echo "Unknown argument $2"
+            exit 1
+        fi
     fi
 elif [ "$1" = "version" ]; then
     echo "${VERSION}"
