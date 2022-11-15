@@ -13,9 +13,6 @@ function source_aws_accounts_file() {
     aws_accounts_file_path="${aws_accounts_directory_path}/.aws_accounts"
     if test -f "${aws_accounts_file_path}"; then
         source "${aws_accounts_file_path}"
-    else
-        echo "Cannot find .aws_accounts file in this or any parent folder."
-        exit 1
     fi
 }
 
@@ -127,7 +124,13 @@ function add_cd_auto_execution() {
 
 function cd {
     builtin cd "\$@"
-    awspm set
+    if [[ $(awspm test) == true ]]; then
+        unset AWS_PROFILE
+        unset AWS_ACCESS_KEY_ID
+        unset AWS_SECRET_ACCESS_KEY
+        unset AWS_SESSION_TOKEN
+        awspm set
+    fi
 }
 cd \$PWD
 EOT
@@ -136,10 +139,31 @@ EOT
     fi
 }
 
+function test_if_value_set() {
+    parameter_value=$1
+    if [[ "${parameter_value}" == "" ]]; then
+        echo false
+    else
+        echo true
+    fi
+}
+
+function fail_for_empty_variable() {
+    parameter_name=$1
+    parameter_value=$2
+    if [[ $(test_if_value_set "${parameter_value}") == false ]]; then
+        echo "Error: Parameter ${parameter_name} not provided." >&2
+        exit 1
+    fi
+}
+
 function init() {
     aws_profile_prefix=$1
+    fail_for_empty_variable "aws_profile_prefix" $aws_profile_prefix
     aws_sso_start_url=$2
+    fail_for_empty_variable "aws_sso_start_url" $aws_sso_start_url
     aws_region=$3
+    fail_for_empty_variable "aws_region" $aws_region
     role_names=$(collect_role_names_from_user)
     missing_configurations=$(build_missing_configurations "${role_names}" "${aws_profile_prefix}" "${aws_sso_start_url}" "${aws_region}")
     add_configurations "${missing_configurations}"
@@ -155,6 +179,7 @@ function exists_in_list() {
 
 function derive_profile_name_from_directory() {
     aws_profile_prefix=$1
+    fail_for_empty_variable "aws_profile_prefix" $aws_profile_prefix
     directory_name="${PWD##*/}"
     if [[ "${directory_name}" == "dev" ]]; then
         directory_name="development"
@@ -176,6 +201,7 @@ function derive_profile_name_from_directory() {
 
 function load_profile() {
     aws_profile_name=$1
+    fail_for_empty_variable "aws_profile_name" $aws_profile_name
     unset AWS_PROFILE
     unset AWS_ACCESS_KEY_ID
     unset AWS_SECRET_ACCESS_KEY
@@ -202,16 +228,24 @@ elif [ "$1" = "set" ]; then
         load_profile $2
         exit 0
     fi
+elif [ "$1" = "test" ]; then
+    source_aws_accounts_file
+    if [[ $(test_if_value_set "${AWS_PROFILE_PREFIX}") == true || $(test_if_value_set "${AWS_SSO_START_URL}") == true || $(test_if_value_set "${AWS_REGION}") == true ]]; then
+        echo true
+    else
+        echo false
+    fi
 elif [ "$1" = "version" ]; then
     echo "${VERSION}"
 else
     echo ""
-    echo "#==============================================================#"
-    echo "# AWS Profile Manager =========================================#"
-    echo "#==============================================================#"
+    echo "#=================================================================================#"
+    echo "# AWS Profile Manager ============================================================#"
+    echo "#=================================================================================#"
     echo "Usage:"
     echo "- awspm init             -> Configures the AWS account profiles."
     echo "- awspm set              -> Loads profile for current folder."
     echo "- awspm set PROFILE_NAME -> Loads profile with given name."
+    echo "- awspm test             -> Checks whether a valid .aws_accounts file can be found."
     echo ""
 fi
