@@ -5,13 +5,77 @@ ZSH_PROFILE_FILE_PATH="${HOME}/.zprofile"
 SEP="TOKENSEPARATOR"
 VERSION=0.0.1
 
-function source_aws_accounts_file() {
+function test_if_aws_accounts_file_exists() {
     aws_accounts_directory_path=$(pwd)
     while [[ "$aws_accounts_directory_path" != "" && ! -e "$aws_accounts_directory_path/.aws_accounts" ]]; do
         aws_accounts_directory_path=${aws_accounts_directory_path%/*}
     done
     aws_accounts_file_path="${aws_accounts_directory_path}/.aws_accounts"
     if test -f "${aws_accounts_file_path}"; then
+        echo true
+    else
+        echo false
+    fi
+}
+
+function create_aws_accounts_file() {
+    default_aws_accounts_file_path="$(pwd)/.aws_accounts"
+    aws_accounts_file_path=""
+    vared -p "Where do you want to create the .aws_accounts file? It should be located in the project root path. [${default_aws_accounts_file_path}] " -c aws_accounts_file_path
+    if [[ "${aws_accounts_file_path}" = "" ]]; then
+        aws_accounts_file_path="${default_aws_accounts_file_path}"
+    fi
+    aws_profile_prefix=""
+    vared -p "Please provide the AWS profile prefix (should look like 'customer-name-project-name') [required]: " -c aws_profile_prefix
+    if [[ "${aws_profile_prefix}" == "" ]]; then
+        echo "AWS profile prefix is required. Exiting."
+        exit 1
+    fi
+    aws_sso_start_url=""
+    vared -p "Please provide the AWS SSO start URL (like 'https://d-123456789.awsapps.com/start') [required]: " -c aws_sso_start_url
+    if [[ "${aws_sso_start_url}" == "" ]]; then
+        echo "AWS SSO start URL is required. Exiting."
+        exit 1
+    fi
+    aws_region=""
+    vared -p "Please provide the AWS region (like 'eu-west-1') [required]: " -c aws_region
+    if [[ "${aws_region}" == "" ]]; then
+        echo "AWS region is required. Exiting."
+        exit 1
+    fi
+    aws_development_account_number=""
+    vared -p "Please provide the AWS development account number [optional]: " -c aws_development_account_number
+    aws_integration_account_number=""
+    vared -p "Please provide the AWS integration account number [optional]: " -c aws_integration_account_number
+    aws_production_account_number=""
+    vared -p "Please provide the AWS production account number [optional]: " -c aws_production_account_number
+    aws_tool_account_number=""
+    vared -p "Please provide the AWS tool account number [optional]: " -c aws_tool_account_number
+    configuration=()
+    configuration+=("export AWS_PROFILE_PREFIX=${aws_profile_prefix}")
+    configuration+=("export AWS_SSO_START_URL=${aws_sso_start_url}")
+    configuration+=("export AWS_REGION=${aws_region}")
+    configuration+=("export AWS_DEVELOPMENT_ACCOUNT_NUMBER=${aws_development_account_number}")
+    configuration+=("export AWS_INTEGRATION_ACCOUNT_NUMBER=${aws_integration_account_number}")
+    configuration+=("export AWS_PRODUCTION_ACCOUNT_NUMBER=${aws_production_account_number}")
+    configuration+=("export AWS_TOOL_ACCOUNT_NUMBER=${aws_tool_account_number}")
+    create_config=""
+    echo ""
+    echo "The following configuration is about to be added to ${aws_accounts_file_path}:"
+    for configuration_part in "${configuration[@]}"; do
+        echo $configuration_part
+    done
+    echo ""
+    vared -p "Do you want to create this file at ${aws_accounts_file_path}? [Yn] " -c create_config
+    if [[ "${create_config}" = "" || "${create_config}" = "Y" || "${create_config}" = "y" ]]; then
+        for configuration_part in "${configuration[@]}"; do
+            echo "${configuration_part}" >> "${aws_accounts_file_path}"
+        done
+    fi
+}
+
+function source_aws_accounts_file() {
+    if [[ $(test_if_aws_accounts_file_exists) == true ]]; then
         source "${aws_accounts_file_path}"
     fi
 }
@@ -196,6 +260,9 @@ function derive_profile_name_from_directory() {
 }
 
 if [ "$1" = "init" ]; then
+    if [[ $(test_if_aws_accounts_file_exists) == false ]]; then
+        create_aws_accounts_file
+    fi
     source_aws_accounts_file
     init "${AWS_PROFILE_PREFIX}" "${AWS_SSO_START_URL}" "${AWS_REGION}"
     exit 0
