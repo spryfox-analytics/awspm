@@ -1,5 +1,3 @@
-# .github/workflows/release.yml
-# Start Homebrew Releaser when a new tag is created
 on:
   push:
     tags:
@@ -14,12 +12,12 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: version
+      - name: Collect version
         run: |
           echo "TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
           TAG=${GITHUB_REF#refs/*/}
           echo "VERSION=${TAG#v}" >> $GITHUB_ENV
-      - name: Compress action step
+      - name: Compress script
         uses: a7ul/tar-action@v1.1.0
         id: compress
         with:
@@ -27,7 +25,7 @@ jobs:
           files: |
             ./src
           outPath: homebrew-awspm-${{ env.TAG }}-darwin-arm64.tar.gz
-      - name: release
+      - name: Release artifact
         uses: actions/create-release@v1
         id: create_release
         with:
@@ -38,7 +36,7 @@ jobs:
           body_path: CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - name: upload darwin artifact
+      - name: Upload artifact
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -47,73 +45,24 @@ jobs:
           asset_path: homebrew-awspm-${{ env.TAG }}-darwin-arm64.tar.gz
           asset_name: homebrew-awspm-${{ env.VERSION }}-darwin-arm64.tar.gz
           asset_content_type: application/gzip
-      - name: Release awspm to Homebrew
+      - name: Release artifact for Homebrew
         uses: Justintime50/homebrew-releaser@v1
         with:
-          # The name of the homebrew tap to publish your formula to as it appears on GitHub.
-          # Required - strings.
           homebrew_owner: spryfox-analytics
           homebrew_tap: homebrew-awspm
-
-          # The name of the folder in your homebrew tap where formula will be committed to.
-          # Default is shown - string.
           formula_folder: formula
-
-          # The GitHub Token (saved as a repo secret) that has `repo` permissions for the homebrew tap you want to release to.
-          # Required - string.
           github_token: ${{ secrets.HOMEBREW_GITHUB_TOKEN }}
-
-          # Git author info used to commit to the homebrew tap.
-          # Defaults are shown - strings.
           commit_owner: Maximilian Walther
           commit_email: maximilian.walther@spryfox.de
-
-          # Custom dependencies in case other formulas are needed to build the current one.
-          # Optional - multiline string.
           depends_on: |
             "bash" => :build
-
-          # Custom install command for your formula.
-          # Required - string.
           install: 'bin.install "awspm.sh" => "awspm"'
-
           # Custom test command for your formula so you can run `brew test`.
           # Optional - string.
           # test: 'assert_match("my script output", shell_output("my-script-command"))'
-
-          # Adds URL and checksum targets for different OS and architecture pairs. Using this option assumes
-          # a tar archive exists on your GitHub repo with the following URL pattern (this cannot be customized):
-          # https://github.com/{GITHUB_OWNER}/{REPO_NAME}/releases/download/{TAG}/{REPO_NAME}-{VERSION}-{OPERATING_SYSTEM}-{ARCHITECTURE}.tar.gz'
-          # Darwin AMD pre-existing path example: https://github.com/justintime50/myrepo/releases/download/v1.2.0/myrepo-1.2.0-darwin-amd64.tar.gz
-          # Linux ARM pre-existing path example: https://github.com/justintime50/myrepo/releases/download/v1.2.0/myrepo-1.2.0-linux-arm64.tar.gz
-          # Optional - booleans.
           target_darwin_amd64: false
           target_darwin_arm64: true
           target_linux_amd64: false
           target_linux_arm64: false
-
-          # Update your homebrew tap's README with a table of all projects in the tap.
-          # This is done by pulling the information from all your formula.rb files - eg:
-          #
-          # | Project                                    | Description  | Install                  |
-          # | ------------------------------------------ | ------------ | ------------------------ |
-          # | [formula_1](https://github.com/user/repo1) | helpful text | `brew install formula_1` |
-          # | [formula_2](https://github.com/user/repo2) | helpful text | `brew install formula_2` |
-          # | [formula_3](https://github.com/user/repo3) | helpful text | `brew install formula_3` |
-          #
-          # Simply place the following in your README or wrap your project in these comment tags:
-          # <!-- project_table_start -->
-          # TABLE HERE
-          # <!--project_table_end -->
-          #
-          # Finally, mark `update_readme_table` as `true` in your GitHub Action config and we'll do the work of building a custom table for you.
-          # Default is `false` - boolean.
-          update_readme_table: true
-
-          # Skips committing the generated formula to a homebrew tap (useful for local testing).
-          # Default is shown - boolean.
           skip_commit: false
-
-          # Logs debugging info to console.
-          # Default is shown - boolean.
           debug: false
