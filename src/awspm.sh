@@ -10,8 +10,9 @@ function find_aws_accounts_file() {
     while [[ "$aws_accounts_directory_path" != "" && ! -e "$aws_accounts_directory_path/.aws_accounts" ]]; do
         aws_accounts_directory_path=${aws_accounts_directory_path%/*}
     done
-    aws_accounts_file_path="${aws_accounts_directory_path}/.aws_accounts"
-    echo "${aws_accounts_file_path}"
+    if [[ "$aws_accounts_directory_path" != "" ]]; then
+        echo "${aws_accounts_directory_path}/.aws_accounts"
+    fi
 }
 
 function create_aws_accounts_file() {
@@ -257,7 +258,7 @@ function derive_profile_name_from_directory() {
 }
 
 if [ "$1" = "init" ]; then
-    if [[ $(find_aws_accounts_file) == "" ]]; then
+    if [[ "$(find_aws_accounts_file)" == "" ]]; then
         create_aws_accounts_file
     fi
     source_aws_accounts_file
