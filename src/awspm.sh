@@ -5,17 +5,13 @@ ZSH_PROFILE_FILE_PATH="${HOME}/.zprofile"
 SEP="TOKENSEPARATOR"
 VERSION=0.0.1
 
-function test_if_aws_accounts_file_exists() {
+function find_aws_accounts_file() {
     aws_accounts_directory_path=$(pwd)
     while [[ "$aws_accounts_directory_path" != "" && ! -e "$aws_accounts_directory_path/.aws_accounts" ]]; do
         aws_accounts_directory_path=${aws_accounts_directory_path%/*}
     done
     aws_accounts_file_path="${aws_accounts_directory_path}/.aws_accounts"
-    if test -f "${aws_accounts_file_path}"; then
-        echo true
-    else
-        echo false
-    fi
+    echo "${aws_accounts_file_path}"
 }
 
 function create_aws_accounts_file() {
@@ -75,7 +71,8 @@ function create_aws_accounts_file() {
 }
 
 function source_aws_accounts_file() {
-    if [[ $(test_if_aws_accounts_file_exists) == true ]]; then
+    aws_accounts_file_path=$(find_aws_accounts_file)
+    if [[ "${aws_accounts_file_path}" != "" ]]; then
         source "${aws_accounts_file_path}"
     fi
 }
@@ -260,7 +257,7 @@ function derive_profile_name_from_directory() {
 }
 
 if [ "$1" = "init" ]; then
-    if [[ $(test_if_aws_accounts_file_exists) == false ]]; then
+    if [[ $(find_aws_accounts_file) == "" ]]; then
         create_aws_accounts_file
     fi
     source_aws_accounts_file
