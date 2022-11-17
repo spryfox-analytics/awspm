@@ -165,14 +165,15 @@ function add_configurations() {
                     required_login_profiles+=("${required_login_profile}")
                 fi
             done
-            echo "Added configurations to ${AWS_CONFIG_FILE_PATH}."
+            echo "✅ Added configurations to ${AWS_CONFIG_FILE_PATH}."
             for required_login_profile in "${required_login_profiles[@]}"; do
-                echo "Enforcing initial login for ${required_login_profile}."
+                echo "❎ Initial login required for ${required_login_profile}."
                 aws sso login --profile "${required_login_profile}"
+                echo "✅ Executed login for ${required_login_profile}."
             done
         fi
     else
-        echo "No configurations to add."
+        echo "✅ No configurations to add."
     fi
 }
 
@@ -188,6 +189,13 @@ function cd {
     builtin cd "\$@"
     if [[ \$(awspm test) == true ]]; then
         export AWS_PROFILE="\$(awspm profile)"
+        if aws sts get-caller-identity > /dev/null ; then
+            echo '✅ AWS credentials valid for \${AWS_PROFILE}.'
+        else
+            echo '❎ AWS credentials expired for \${AWS_PROFILE}. Refreshing via SSO...'
+            aws sso login
+            echo '✅ AWS credentials valid for \${AWS_PROFILE}.'
+        fi
     fi
 }
 cd \$PWD
@@ -237,6 +245,7 @@ function exists_in_list() {
 
 function derive_profile_name_from_directory() {
     aws_profile_prefix=$1
+    role_name=$2
     fail_for_empty_variable "aws_profile_prefix" $aws_profile_prefix
     directory_name="${PWD##*/}"
     if [[ "${directory_name}" == "dev" ]]; then
@@ -249,9 +258,11 @@ function derive_profile_name_from_directory() {
     directory_names="development integration production tool"
     if exists_in_list "${directory_names}" " " "${directory_name}"; then
         aws_profile_base_name="${aws_profile_prefix}-${directory_name}"
-        vared -p "Which role do you want to request for ${aws_profile_base_name}? [read] " -c role_name
         if [[ "${role_name}" == "" ]]; then
-            role_name="read"
+            vared -p "Which role do you want to request for ${aws_profile_base_name}? [read] " -c role_name
+            if [[ "${role_name}" == "" ]]; then
+                role_name="read"
+            fi
         fi
         echo "${aws_profile_base_name}-${role_name}"
     fi
@@ -270,7 +281,7 @@ elif [ "$1" = "profile" ]; then
     exit 0
 elif [ "$1" = "test" ]; then
     source_aws_accounts_file
-    if [[ $(test_if_value_set "${AWS_PROFILE_PREFIX}") == true || $(test_if_value_set "${AWS_SSO_START_URL}") == true || $(test_if_value_set "${AWS_REGION}") == true ]]; then
+    if [[ "$(derive_profile_name_from_directory "${AWS_PROFILE_PREFIX}" "login")" != "" && ($(test_if_value_set "${AWS_PROFILE_PREFIX}") == true || $(test_if_value_set "${AWS_SSO_START_URL}") == true || $(test_if_value_set "${AWS_REGION}") == true) ]]; then
         echo true
     else
         echo false
@@ -281,13 +292,13 @@ elif [ "$1" = "version" ]; then
     exit 0
 else
     echo ""
-    echo "#=================================================================================#"
-    echo "# AWS Profile Manager ============================================================#"
-    echo "#=================================================================================#"
+    echo "#=================================================================#"
+    echo "# AWS Profile Manager ============================================#"
+    echo "#=================================================================#"
     echo "Usage:"
     echo "- awspm init             -> Configures the AWS account profiles."
     echo "- awspm profile          -> Derives a profile name for the current folder."
-    echo "- awspm test             -> Checks whether a valid .aws_accounts file can be found."
+    echo "- awspm test             -> Checks whether a valid .aws_accounts file can be found and the current folder is a Terraform folder."
     echo ""
     exit 0
 fi
