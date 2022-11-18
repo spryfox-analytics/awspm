@@ -191,11 +191,11 @@ function cd {
     if [[ \$(awspm test) == true ]]; then
         export AWS_PROFILE="\$(awspm profile)"
         if aws sts get-caller-identity > /dev/null ; then
-            echo '✅ AWS credentials valid for \${AWS_PROFILE}.'
+            echo "✅ AWS credentials valid for \${AWS_PROFILE}."
         else
-            echo '❎ AWS credentials expired for \${AWS_PROFILE}. Refreshing via SSO...'
+            echo "❎ AWS credentials expired for \${AWS_PROFILE}. Refreshing via SSO..."
             aws sso login
-            echo '✅ AWS credentials valid for \${AWS_PROFILE}.'
+            echo "✅ AWS credentials valid for \${AWS_PROFILE}."
         fi
     fi
 }
