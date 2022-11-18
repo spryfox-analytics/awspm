@@ -5,8 +5,8 @@
 class HomebrewAwspm < Formula
   desc "Awspm, the aws profile manager, helps to set up your aws environment for deployi"
   homepage "https://github.com/spryfox-analytics/homebrew-awspm"
-  url "https://github.com/spryfox-analytics/homebrew-awspm/archive/v0.0.31.tar.gz"
-  sha256 "7c2337544b6748278dd06f71f07b43765899f6fbe902efce887c25a5be8f206e"
+  url "https://github.com/spryfox-analytics/homebrew-awspm/archive/v0.0.32.tar.gz"
+  sha256 "0fc07818d68aaa10dbba86502f025ed7d30bb0e5ed22e5896228afb0b82df6e0"
   license ""
 
   depends_on "bash" => :build
@@ -14,8 +14,8 @@ class HomebrewAwspm < Formula
   on_macos do
 
     on_arm do
-      url "https://github.com/spryfox-analytics/homebrew-awspm/releases/download/v0.0.31/homebrew-awspm-0.0.31-darwin-arm64.tar.gz"
-      sha256 "cb13c03439362a8becd3eb5126518a3d69b7d0500a8666a2465591ae08bc7804"
+      url "https://github.com/spryfox-analytics/homebrew-awspm/releases/download/v0.0.32/homebrew-awspm-0.0.32-darwin-arm64.tar.gz"
+      sha256 "1666e41f93eb2e0b3fa4c860d40f35c6d02e1569b5b38ef7d00b23b9348297d1"
     end
   end
 
