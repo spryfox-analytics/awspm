@@ -246,7 +246,9 @@ function exists_in_list() {
 function derive_profile_name_from_directory() {
     aws_profile_prefix=$1
     role_name=$2
-    fail_for_empty_variable "aws_profile_prefix" $aws_profile_prefix
+    if [[ "${role_name}" == "" ]]; then
+        fail_for_empty_variable "aws_profile_prefix" $aws_profile_prefix
+    fi
     directory_name="${PWD##*/}"
     if [[ "${directory_name}" == "dev" ]]; then
         directory_name="development"
