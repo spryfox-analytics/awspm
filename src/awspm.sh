@@ -68,6 +68,7 @@ function create_aws_accounts_file() {
         for configuration_part in "${configuration[@]}"; do
             echo "${configuration_part}" >> "${aws_accounts_file_path}"
         done
+        echo "✅ File has been created at ${aws_accounts_file_path}."
     fi
 }
 
@@ -202,6 +203,7 @@ cd \$PWD
 EOT
             source "${ZSH_PROFILE_FILE_PATH}"
         fi
+        echo "✅ Added auto-run configuration to ${ZSH_PROFILE_FILE_PATH}."
     fi
 }
 
