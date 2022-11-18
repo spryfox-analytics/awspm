@@ -201,9 +201,9 @@ function cd {
 }
 cd \$PWD
 EOT
-            source "${ZSH_PROFILE_FILE_PATH}"
         fi
         echo "✅ Added auto-run configuration to ${ZSH_PROFILE_FILE_PATH}."
+        echo "❎ Please run 'source ${ZSH_PROFILE_FILE_PATH}' in all open shells."
     fi
 }
 
