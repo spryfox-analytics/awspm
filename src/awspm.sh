@@ -40,6 +40,8 @@ function create_aws_accounts_file() {
         echo "AWS region is required. Exiting."
         exit 1
     fi
+    aws_managing_account_number=""
+    vared -p "Please provide the AWS managing account number [optional]: " -c aws_managing_account_number
     aws_development_account_number=""
     vared -p "Please provide the AWS development account number [optional]: " -c aws_development_account_number
     aws_integration_account_number=""
@@ -52,6 +54,7 @@ function create_aws_accounts_file() {
     configuration+=("export AWS_PROFILE_PREFIX=${aws_profile_prefix}")
     configuration+=("export AWS_SSO_START_URL=${aws_sso_start_url}")
     configuration+=("export AWS_REGION=${aws_region}")
+    configuration+=("export AWS_MANAGING_ACCOUNT_NUMBER=${aws_managing_account_number}")
     configuration+=("export AWS_DEVELOPMENT_ACCOUNT_NUMBER=${aws_development_account_number}")
     configuration+=("export AWS_INTEGRATION_ACCOUNT_NUMBER=${aws_integration_account_number}")
     configuration+=("export AWS_PRODUCTION_ACCOUNT_NUMBER=${aws_production_account_number}")
@@ -123,7 +126,7 @@ function build_missing_configurations() {
     aws_sso_start_url=$3
     aws_region=$4
     missing_configurations=""
-    for stage in development integration production tool
+    for stage in managing development integration production tool
     do
         aws_account_number="${(P)$(echo "AWS_${stage:u}_ACCOUNT_NUMBER")}"
         if [[ "${aws_account_number}" != "" ]]; then
@@ -252,14 +255,16 @@ function derive_profile_name_from_directory() {
         fail_for_empty_variable "aws_profile_prefix" $aws_profile_prefix
     fi
     directory_name="${PWD##*/}"
-    if [[ "${directory_name}" == "dev" ]]; then
+    if [[ "${directory_name}" == "mgmt" ]]; then
+        directory_name="managing"
+    elif [[ "${directory_name}" == "dev" ]]; then
         directory_name="development"
     elif  [[ "${directory_name}" == "int" ]]; then
         directory_name="integration"
     elif  [[ "${directory_name}" == "prod" ]]; then
         directory_name="production"
     fi
-    directory_names="development integration production tool"
+    directory_names="managing development integration production tool"
     if exists_in_list "${directory_names}" " " "${directory_name}"; then
         aws_profile_base_name="${aws_profile_prefix}-${directory_name}"
         if [[ "${role_name}" == "" ]]; then
