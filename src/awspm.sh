@@ -84,9 +84,9 @@ function source_aws_accounts_file() {
 
 function collect_role_names_from_user() {
     role_names=""
-    vared -p "For which role names do your want to create profiles (comma-separated values)? [read,write] " -c role_names
+    vared -p "For which role names do your want to create profiles (comma-separated values)? [view,dev,admin] " -c role_names
     if [[ "${role_names}" = "" ]]; then
-        role_names="read,write"
+        role_names="view,dev,admin"
     fi
     echo "${role_names}"
 }
@@ -268,9 +268,9 @@ function derive_profile_name_from_directory() {
     if exists_in_list "${directory_names}" " " "${directory_name}"; then
         aws_profile_base_name="${aws_profile_prefix}-${directory_name}"
         if [[ "${role_name}" == "" ]]; then
-            vared -p "Which role do you want to request for ${aws_profile_base_name}? [read] " -c role_name
+            vared -p "Which role do you want to request for ${aws_profile_base_name}? [dev] " -c role_name
             if [[ "${role_name}" == "" ]]; then
-                role_name="read"
+                role_name="dev"
             fi
         fi
         echo "${aws_profile_base_name}-${role_name}"
