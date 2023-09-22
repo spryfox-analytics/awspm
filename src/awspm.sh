@@ -268,9 +268,9 @@ function derive_profile_name_from_directory() {
     if exists_in_list "${directory_names}" " " "${directory_name}"; then
         aws_profile_base_name="${aws_profile_prefix}-${directory_name}"
         if [[ "${role_name}" == "" ]]; then
-            vared -p "Which role do you want to request for ${aws_profile_base_name}? [dev] " -c role_name
+            vared -p "Which role do you want to request for ${aws_profile_base_name}? [view] " -c role_name
             if [[ "${role_name}" == "" ]]; then
-                role_name="dev"
+                role_name="view"
             fi
         fi
         echo "${aws_profile_base_name}-${role_name}"
